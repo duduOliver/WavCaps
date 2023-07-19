@@ -9,6 +9,10 @@ import torch.nn as nn
 from models.cnns import ResNet38, Cnn14
 from models.htsat import HTSAT_Swin_Transformer
 
+# import os
+# print("Current working directory: {0}".format(os.getcwd()))
+# print("Current script directory: {0}".format(os.path.dirname(os.path.abspath(__file__))))
+
 
 class AudioEncoder(nn.Module):
 
@@ -23,7 +27,7 @@ class AudioEncoder(nn.Module):
 
             if config["audio_encoder_args"]["pretrained"]:
                 # loading pretrained CNN weights
-                pretrained_cnn = torch.load('pretrained_models/audio_encoder/{}.pth'.
+                pretrained_cnn = torch.load('../pretrained_models/audio_encoder/{}.pth'.
                                             format(config["audio_encoder_args"]["model"]))['model']
                 dict_new = self.audio_enc.state_dict().copy()
                 trained_list = [i for i in pretrained_cnn.keys()
@@ -47,7 +51,7 @@ class AudioEncoder(nn.Module):
                 config=config,
             )
             if config["audio_encoder_args"]["pretrained"]:
-                audio_ckpt = torch.load("pretrained_models/audio_encoder/HTSAT.ckpt", map_location="cpu")["state_dict"]
+                audio_ckpt = torch.load("../pretrained_models/audio_encoder/HTSAT.ckpt", map_location="cpu")["state_dict"]
                 for key in list(audio_ckpt.keys()):
                     if key.startswith('sed_model') and ('spectrogram_extractor' not in key
                                                         and 'logmel_extractor' not in key):

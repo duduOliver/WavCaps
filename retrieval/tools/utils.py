@@ -2,7 +2,8 @@
 # coding: utf-8
 # @Author  : Xinhao Mei @CVSSP, University of Surrey
 # @E-mail  : x.mei@surrey.ac.uk
-
+# import sys, os
+# sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import os
 import sys
@@ -66,20 +67,37 @@ def setup_seed(seed):
     torch.backends.cudnn.benchmark = False
 
 
+# def setup_for_distributed(is_master):
+#     """
+#        This function disables printing when not in master process
+#        """
+#     import builtins as __builtin__
+
+#     builtin_print = __builtin__.print
+
+#     def print(*args, **kwargs):
+#         force = kwargs.pop("force", False)
+#         if is_master or force:
+#             builtin_print(*args, **kwargs)
+
+#     __builtin__.print = print
+
+    # def custom_print(*args, **kwargs):
+    #     force = kwargs.pop("force", False)
+    #     if is_master or force:
+    #         builtin_print(*args, **kwargs)
+
+    # setattr(__import__('tools.utils'), 'print', custom_print)
+    
 def setup_for_distributed(is_master):
     """
-       This function disables printing when not in master process
-       """
-    import builtins as __builtin__
+    This function disables printing when not in the master process.
+    """
+    import sys
 
-    builtin_print = __builtin__.print
-
-    def print(*args, **kwargs):
-        force = kwargs.pop("force", False)
-        if is_master or force:
-            builtin_print(*args, **kwargs)
-
-    __builtin__.print = print
+    if not is_master:
+        sys.stdout = open('/dev/null', 'w')
+        sys.stderr = open('/dev/null', 'w')
 
 
 def is_dist_avail_and_initialized():
@@ -135,6 +153,7 @@ def init_distributed_mode(args):
     )
     torch.distributed.barrier()
     setup_for_distributed(args["rank"] == 0)
+    # print('well defined the print function at node{}.\n'.format(args["rank"]))
 
 
 def log_results(results, dataset, main_logger, test=False):

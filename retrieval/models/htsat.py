@@ -4,6 +4,12 @@
 # Model Core
 # below codes are based and referred from https://github.com/microsoft/Swin-Transformer
 # Swin Transformer for Computer Vision: https://arxiv.org/pdf/2103.14030.pdf
+# import os
+# os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
+# os.environ["CUDA_VISIBLE_DEVICES"]="5,6,7"
+
+import sys, os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 import logging
@@ -907,6 +913,7 @@ class HTSAT_Swin_Transformer(nn.Module):
         B, C, T, F = x.shape
         target_T = int(self.spec_size * self.freq_ratio)
         target_F = self.spec_size // self.freq_ratio
+        # print('B={}, C={}, T={}, F={}, target_T={}, target_F={} at reshape_wav2img'.format(B, C, T, F, target_T, target_F))
         assert T <= target_T and F <= target_F, "the wav size should less than or equal to the swin input size"
         # to avoid bicubic zero error
         if T < target_T:
@@ -925,6 +932,7 @@ class HTSAT_Swin_Transformer(nn.Module):
         B, C, T, F = x.shape
         target_T = int(self.spec_size * self.freq_ratio)
         target_F = self.spec_size // self.freq_ratio
+        # print('B={}, C={}, T={}, F={}, target_T={}, target_F={} at repeat_wat2img'.format(B, C, T, F, target_T, target_F))
         assert T <= target_T and F <= target_F, "the wav size should less than or equal to the swin input size"
         # to avoid bicubic zero error
         if T < target_T:
@@ -952,12 +960,14 @@ class HTSAT_Swin_Transformer(nn.Module):
 
         x = self.reshape_wav2img(x)
         output_dict = self.forward_features(x)
+        # print(output_dict)
+        # sys.exit(0)
         # x = self.head(x)
         return output_dict["embedding"]
 
 
 if __name__ == '__main__':
-    with open("../settings/settings.yaml", "r") as f:
+    with open("settings/baseline.yaml", "r") as f:
         config = yaml.safe_load(f)
     model = HTSAT_Swin_Transformer(
         spec_size=256,
