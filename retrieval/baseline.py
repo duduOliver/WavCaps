@@ -32,7 +32,7 @@ from tools.utils import (
     AverageMeter, t2a, a2t, set_logger, log_results,
 )
 
-WB_LOG = True
+WB_LOG = False
 
 def train(model, dataloader, optimizer, scheduler, device, epoch):
     model.train()
@@ -121,10 +121,10 @@ def main():
 
     if is_main_process() and WB_LOG:
         wandb.init(
-            project="Clotho_ASE_DDP",
+            project="Clotho_ASE_DDP_global_Embeddings",
             name=exp_name,
             config=config,
-            group="freeze",  # all runs for the experiment in one group
+            group="unfreeze",  # all runs for the experiment in one group
         )
 
     # self_add create BASELINE dataloader
@@ -184,8 +184,8 @@ def main():
     model_without_ddp = model
     if is_dist_avail_and_initialized():
         model = torch.nn.parallel.DistributedDataParallel(
-            model
-            # find_unused_parameters=True #ONLY USED IN UNFREEZE HTSAT MODEL
+            model,
+            find_unused_parameters=True #ONLY USED IN UNFREEZE HTSAT MODEL
         )
         model_without_ddp = model.module
         
