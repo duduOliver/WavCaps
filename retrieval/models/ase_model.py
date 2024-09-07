@@ -18,7 +18,8 @@ class ASE(nn.Module):
 
     def __init__(self, config):
         super().__init__()
-
+        
+        self.config = config
         self.audio_encoder = AudioEncoder(config)
         self.text_encoder = TextEncoder(config)
 
@@ -47,7 +48,10 @@ class ASE(nn.Module):
 
     def encode_audio(self, audio):
         audio_feats = self.audio_encoder(audio)
-        audio_embeds = F.normalize(self.audio_proj(audio_feats), dim=-1)
+        if self.config["audio_encoder_args"]["type"] == "dac_embedder":
+            audio_embeds = F.normalize(self.audio_proj(audio_feats[:, 0, 0, :]), dim=-1)
+        else:
+            audio_embeds = F.normalize(self.audio_proj(audio_feats), dim=-1)
         return audio_embeds
 
     def encode_text(self, text):

@@ -20,7 +20,8 @@ class AudioCaptionDataset(Dataset):
         self.split = split
         self.sr = audio_config["sr"]
 
-        json_path = f"data/{dataset}/json_files/{split}.json"
+        # json_path = f"data/{dataset}/json_files/{split}.json"
+        json_path = f"WavCaps/retrieval/data/{dataset}/json_files/{split}.json"
 
         if audio_config["max_length"] != 0:
             self.max_length = audio_config["max_length"] * self.sr
@@ -54,9 +55,13 @@ class AudioCaptionDataset(Dataset):
         if self.max_length != 0:
             # if audio length is longer than max_length, we random crop it
             if waveform.shape[-1] > self.max_length:
-                max_start = waveform.shape[-1] - self.max_length
-                start = random.randint(0, max_start)
-                waveform = waveform[start: start + self.max_length]
+                #TODO if split is train, use random crop, else use fixed crop;
+                if self.split == "train":
+                    max_start = waveform.shape[-1] - self.max_length
+                    start = random.randint(0, max_start)
+                    waveform = waveform[start: start + self.max_length]
+                else:
+                    waveform = waveform[0 : self.max_length]
 
         caption = text_preprocess(self.captions[index])
 

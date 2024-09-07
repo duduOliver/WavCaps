@@ -1,0 +1,85 @@
+device: "cuda"
+seed: 20
+embed_size: 1024
+temp: 0.07
+# queue_size: 5120
+json_files: ["retrieval/data/Clotho/json_files/train.json"]
+# json_files: ["retrieval/data/Clotho/json_files/test.json"]
+resume: false
+blacklist: "data/json_files/blacklist/" # path to blacklist file
+embed_regularization: true
+
+dist_args:
+  world_size: 1 # fake value
+  dist_url: "env://" # TO CHECK
+
+audio_args:
+  # sr: 32000 # for non-dac usage
+  sr: 16000 # for dac only
+  # sr: 44100 # for dac only
+  n_fft: 1024
+  hop_length: 320
+  f_min: 50
+  f_max: 14000
+  n_mels: 64
+  max_length: 10 # htsat:10; CNN:30;
+  mono: True
+
+
+audio_encoder_args:
+  type: "dac"
+  model: "dac_16khz_latents"
+  # model: "dac_44khz_latents"
+  # type: "dac_embedder"
+  # model: "dac_embedder"
+  # type: "dac_htsat"
+  # model: "dac_htsat_16khz_C8"
+  # type: "dac_htsat"
+  # model: "dac_htsat_44khz_C8"
+  pretrained: True 
+  freeze: True
+  spec_augment: False
+  # audio_width: 2000 # for dac usage only; 4*500=2000
+  # N_CODEBOOKS: 4 # for dac usage only; dims are 500 for 10s long; 
+  audio_width: 16000 # for dac usage only; 4*8*500=16000, latents
+  N_CODEBOOKS: 4 # for dac usage only; dims are 500 for 10s long; 
+  # audio_width: 32000 # for dac usage only; 8*8*500=32000, latents
+  # N_CODEBOOKS: 8 # for dac usage only; dims are 500 for 10s long; 
+  # audio_width: 48000 # for dac usage only; 12*8*500=48000, latents
+  # N_CODEBOOKS: 12 # for dac usage only; dims are 500 for 10s long; 
+  # audio_width: 62064 # for dac usage only; 9*8*862 = 62064 for 10s long; 
+  # N_CODEBOOKS: 9 # for dac usage only, 44k for 10s long; 
+  dac_path: '/home/dhuang/.cache/descript/dac/weights_16khz_8kbps_0.0.5.pth'
+  # dac_path: '/home/dhuang/.cache/descript/dac/weights_44khz_8kbps_0.0.1.pth'
+  # audio_width: 1966080 # for dac embedder model usage only; (2000//462 + 1) * 512
+  # audio_width: 3072
+  # audio_width: 768
+  # N_CODEBOOKS: 8 # for dac usage only; dims are 500 for 10s long; 
+  # DAC_Device: "cpu"
+
+
+data_args:
+  batch_size: 32
+  num_workers: 56
+
+
+text_encoder_args:
+  type: 'bert-base-uncased'
+  freeze: False
+
+
+optim_args:
+  lr: !!float 5e-5
+  warmup_steps: 0
+  optimizer_name: "adam"
+  betas: [0.9, 0.999]
+  eps: !!float 1e-8
+  momentum: 0.9
+  warmup_epochs: 2
+
+
+training:
+  spec_augmentation: False
+  epochs: 15
+  clip_grad: 2
+  dropout: 0.2

@@ -66,20 +66,30 @@ def setup_seed(seed):
     torch.backends.cudnn.benchmark = False
 
 
+# def setup_for_distributed(is_master):
+#     """
+#        This function disables printing when not in master process
+#        """
+#     import builtins as __builtin__
+
+#     builtin_print = __builtin__.print
+
+#     def print(*args, **kwargs):
+#         force = kwargs.pop("force", False)
+#         if is_master or force:
+#             builtin_print(*args, **kwargs)
+
+#     __builtin__.print = print
+
 def setup_for_distributed(is_master):
     """
-       This function disables printing when not in master process
-       """
-    import builtins as __builtin__
+    This function disables printing when not in the master process.
+    """
+    import sys
 
-    builtin_print = __builtin__.print
-
-    def print(*args, **kwargs):
-        force = kwargs.pop("force", False)
-        if is_master or force:
-            builtin_print(*args, **kwargs)
-
-    __builtin__.print = print
+    if not is_master:
+        sys.stdout = open('/dev/null', 'w')
+        sys.stderr = open('/dev/null', 'w')
 
 
 def is_dist_avail_and_initialized():
@@ -150,6 +160,7 @@ def log_results(results, dataset, main_logger, test=False):
         f"{dataset}:{pre}_t2a/r1": results["t2a"][0],
         f"{dataset}:{pre}_t2a/r5": results["t2a"][1],
         f"{dataset}:{pre}_t2a/r10": results["t2a"][2],
+        f"{dataset}:{pre}_t2a/r50": results["t2a"][3],
         f"{dataset}:{pre}_t2a/mAP10": results["t2a"][-1],
     })
 
@@ -157,6 +168,7 @@ def log_results(results, dataset, main_logger, test=False):
         f"{dataset}:{pre}_a2t/r1": results["a2t"][0],
         f"{dataset}:{pre}_a2t/r5": results["a2t"][1],
         f"{dataset}:{pre}_a2t/r10": results["a2t"][2],
+        f"{dataset}:{pre}_a2t/r50": results["a2t"][3],
         f"{dataset}:{pre}_a2t/mAP10": results["a2t"][-1],
     })
 
